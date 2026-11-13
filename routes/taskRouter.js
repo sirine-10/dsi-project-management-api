@@ -7,7 +7,7 @@ const roleMiddleware = require("../middlewares/roleMiddleware");
 const {assignTask} = require("../controllers/taskController");
 const {
   createTask,
-  getTasks,
+  listTasks,
   getTaskById,
   updateTask,
   deleteTask
@@ -16,7 +16,7 @@ const {
 router.use(authMiddleware);
 
 router.post("/", createTask);
-router.get("/", getTasks);
+router.get("/", listTasks);
 router.get("/:id", getTaskById);
 router.put("/:id", updateTask);
 router.delete("/:id", deleteTask);

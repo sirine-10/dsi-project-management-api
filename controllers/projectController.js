@@ -149,10 +149,49 @@ const deleteProject = async (req, res) => {
     res.status(500).json({ message: "Erreur serveur" });
   }
 };
+
+const listProjects = async (req, res) => {
+  try {
+    const filter = {};
+
+    // Ken user aadi ychouf ken les projets mte3ou
+    // Ken manager ychouf les projets lkol
+    if (req.user.role !== "manager") {
+      filter.owner = req.user.id;
+    }
+
+    // Nfiltriw les projets 7asb el status
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+
+    // Nlawjou 3al projet bel esm
+    if (req.query.search) {
+      filter.nom = {
+        $regex: req.query.search,
+        $options: "i"
+      };
+    }
+
+    // Nratbou mel 9dim lel jdid walla bel 3aks
+    const sort = req.query.sort === "asc" ? 1 : -1;
+
+    // Njibou les projets mel database
+    const projects = await Project.find(filter)
+      .sort({ createdAt: sort });
+
+    res.json(projects);
+
+  } catch (error) {
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
 module.exports = {
   createProject,
   getProjects,
   getProjectById,
   updateProject,
-  deleteProject
+  deleteProject,
+    listProjects
 };

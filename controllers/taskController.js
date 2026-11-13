@@ -44,21 +44,51 @@ const createTask = async (req, res) => {
 };
 
 // Afficher les tâches de mes projets
-const getTasks = async (req, res) => {
-  try {
-    const projects = await Project.find({
-      owner: req.user.id
-    });
 
-    const tasks = await Task.find({
-      project: { $in: projects.map(p => p._id) }
-    });
+const listTasks = async (req, res) => {
+  try {
+    const filter = {};
+
+    // Ken user aadi ychouf ken les taches mtaa projets mte3ou
+    // Ken manager ychouf les taches lkol
+    if (req.user.role !== "manager") {
+      const projects = await Project.find({
+        owner: req.user.id
+      });
+
+      // Njibou les ID mtaa les projets mte3ou
+      filter.project = {
+        $in: projects.map(p => p._id)
+      };
+    }
+
+    // Nfiltriw les taches 7asb el status
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+
+    // Nlawjou 3al tache bel titre
+    if (req.query.search) {
+      filter.titre = {
+        $regex: req.query.search,
+        $options: "i"
+      };
+    }
+
+    // Nratbou mel 9dim lel jdid walla bel 3aks
+    const sort = req.query.sort === "asc" ? 1 : -1;
+
+    // Njibou les taches mel database
+    const tasks = await Task.find(filter)
+      .sort({ createdAt: sort });
 
     res.json(tasks);
+
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur" });
   }
 };
+
 
 // Afficher une tâche par ID
 const getTaskById = async (req, res) => {
@@ -192,9 +222,10 @@ const assignTask = async (req, res) => {
 };
 module.exports = {
   createTask,
-  getTasks,
+  listTasks,
   getTaskById,
   updateTask,
   deleteTask,
-assignTask
+ 
+  assignTask
 };
