@@ -1,6 +1,7 @@
 
 const Task = require("../models/Task");
 const Project = require("../models/Project");
+const User = require("../models/User");
 
 // Ajouter une tâche
 const createTask = async (req, res) => {
@@ -155,10 +156,45 @@ const deleteTask = async (req, res) => {
   }
 };
 
+// Manager yaffecti tâche lel utilisateur
+const assignTask = async (req, res) => {
+  try {
+    const { assignedUser } = req.body;
+
+    const task = await Task.findById(req.params.id);
+
+    if (!task) {
+      return res.status(404).json({
+        message: "Tache introuvable"
+      });
+    }
+
+    const user = await User.findById(assignedUser);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "Utilisateur introuvable"
+      });
+    }
+
+    task.assignedUser = user._id;
+    await task.save();
+
+    res.json({
+      message: "Tache affectee avec succes",
+      task
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: "ID invalide"
+    });
+  }
+};
 module.exports = {
   createTask,
   getTasks,
   getTaskById,
   updateTask,
-  deleteTask
+  deleteTask,
+assignTask
 };

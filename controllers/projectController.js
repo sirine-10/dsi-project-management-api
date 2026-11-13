@@ -44,10 +44,15 @@ const createProject = async (req, res) => {
 // Nraj3ou les projets mtaa utilisateur
 const getProjects = async (req, res) => {
   try {
-    const projects = await Project.find({
-      owner: req.user.id
-    }).sort({ createdAt: -1 });
-
+    if (req.user.role === "manager") {
+      // Manager ynajem ychouf les projets lkol
+      projects = await Project.find().sort({ createdAt: -1 });
+    } else {
+      // User ychouf ken les projets mte3ou
+      projects = await Project.find({
+        owner: req.user.id
+      }).sort({ createdAt: -1 });
+    }
     res.json(projects);
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur" });
